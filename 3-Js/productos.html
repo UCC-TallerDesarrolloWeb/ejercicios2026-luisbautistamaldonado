@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Productos</title>
+    <!-- HOJA DE ESTILOS ENLAZADA -->
+    <link rel="stylesheet" href="productos.css">
+    <!-- PRODUCTOS Y FUNCIONES DE LA TIENDA -->
+    <script src="tienda.js"></script>
+</head>
+<body onload="cargarCatalogo()">
+
+<header>
+    <h1>Nuestros Productos</h1>
+</header>
+
+<!-- BOTONES DE NAVEGACIÓN -->
+<nav>
+    <button class="btn btn-catalogo" onclick="location.href='productos.html'">Catálogo</button>
+    <button class="btn btn-carrito" onclick="location.href='carrito.html'">Carrito de Compras (<span id="contador">0</span>)</button>
+</nav>
+
+<div class="contenedor">
+
+    <!-- FILTROS -->
+    <aside class="filtros">
+        <form onsubmit="filtrarProductos(event)" onreset="limpiarFiltros()">
+            <fieldset>
+                <legend>Búsqueda</legend>
+                <label for="buscar">Buscar:</label>
+                <input type="search" id="buscar" name="buscar">
+            </fieldset>
+
+            <fieldset>
+                <legend>Precios</legend>
+                <p>
+                    <label for="minimo">Mínimo:</label>
+                    <input type="number" id="minimo" name="minimo" min="0">
+                </p>
+                <p>
+                    <label for="maximo">Máximo:</label>
+                    <input type="number" id="maximo" name="maximo" min="0">
+                </p>
+            </fieldset>
+
+            <fieldset>
+                <legend>Tipo de Productos</legend>
+                <p>
+                    <input type="checkbox" id="protectores" name="categoria" value="Protectores">
+                    <label for="protectores">Protectores</label>
+                </p>
+                <p>
+                    <input type="checkbox" id="entrenamiento" name="categoria" value="Entrenamiento">
+                    <label for="entrenamiento">Entrenamiento</label>
+                </p>
+                <p>
+                    <input type="checkbox" id="doboks" name="categoria" value="Dobok">
+                    <label for="doboks">Doboks</label>
+                </p>
+            </fieldset>
+
+            <fieldset>
+                <legend>Marca</legend>
+                <label for="marca">Seleccione:</label>
+                <select id="marca" name="marca">
+                    <option value="">Todas</option>
+                    <option value="Gran Marc">Gran Marc</option>
+                    <option value="Daedo">Daedo</option>
+                </select>
+            </fieldset>
+
+            <fieldset>
+                <legend>Ordenar</legend>
+                <label for="orden">Ordenar por:</label>
+                <select id="orden" name="orden" onchange="filtrarProductos()">
+                    <option value="">Sin orden</option>
+                    <option value="precio-asc">Precio: menor a mayor</option>
+                    <option value="precio-desc">Precio: mayor a menor</option>
+                    <option value="nombre-asc">Nombre: A-Z</option>
+                    <option value="nombre-desc">Nombre: Z-A</option>
+                </select>
+            </fieldset>
+
+            <button type="submit">Filtrar</button>
+            <button type="reset">Limpiar</button>
+        </form>
+    </aside>
+
+    <!-- TARJETAS: se generan con JavaScript -->
+    <main class="grid-productos" id="catalogo"></main>
+
+</div>
+
+<!-- DETALLE DEL PRODUCTO -->
+<dialog id="detalle">
+    <div id="detalleContenido"></div>
+    <button class="btn-tarjeta" onclick="cerrarDetalle()">Cerrar</button>
+</dialog>
+
+<footer>
+    <p>Taller de Desarrollo Web - 2026</p>
+</footer>
+
+</body>
+</html>
