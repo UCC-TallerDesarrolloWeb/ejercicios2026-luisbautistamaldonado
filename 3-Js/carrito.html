@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Carrito de Compras</title>
+    <!-- HOJA DE ESTILOS ENLAZADA -->
+    <link rel="stylesheet" href="productos.css">
+    <!-- PRODUCTOS Y FUNCIONES DE LA TIENDA -->
+    <script src="tienda.js"></script>
+</head>
+<body onload="mostrarCarrito()">
+
+<header>
+    <h1>Nuestros Productos</h1>
+</header>
+
+<!-- BOTONES DE NAVEGACIÓN -->
+<nav>
+    <button class="btn btn-catalogo" onclick="location.href='productos.html'">Catálogo</button>
+    <button class="btn btn-carrito" onclick="location.href='carrito.html'">Carrito de Compras (<span id="contador">0</span>)</button>
+</nav>
+
+<main class="carrito">
+    <h2>Carrito de Compras</h2>
+
+    <!-- LISTADO: se genera con JavaScript -->
+    <div id="listaCarrito"></div>
+
+    <p class="total">Total a pagar: <span id="total"></span></p>
+    <button class="btn-tarjeta" onclick="vaciarCarrito()">Vaciar el Carrito</button>
+</main>
+
+<footer>
+    <p>Taller de Desarrollo Web - 2026</p>
+</footer>
+
+</body>
+</html>
