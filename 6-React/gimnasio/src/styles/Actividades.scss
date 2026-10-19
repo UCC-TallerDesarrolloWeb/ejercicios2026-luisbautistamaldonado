@@ -1,0 +1,40 @@
+@use 'variables';
+
+.actividades {
+  h2 {
+    margin-top: 0;
+  }
+
+  &__aviso {
+    color: variables.$gris;
+  }
+
+  &__lista {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+  }
+
+  &__horarios {
+    padding-left: 1.2rem;
+  }
+
+  &__boton {
+    width: 100%;
+    padding: 0.6rem;
+    background-color: variables.$primario;
+    color: variables.$blanco;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      background-color: variables.$primario-hover;
+    }
+
+    &:disabled {
+      background-color: variables.$gris;
+      cursor: default;
+    }
+  }
+}

@@ -1,0 +1,12 @@
+@use 'variables';
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: variables.$fondo;
+  color: variables.$texto;
+}

@@ -1,0 +1,75 @@
+@use 'variables';
+
+.layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1rem 2rem;
+  background-color: variables.$oscuro;
+  color: variables.$blanco;
+
+  &__logo {
+    margin: 0;
+    font-size: 1.4rem;
+  }
+
+  &__nav {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+
+    a {
+      color: variables.$blanco;
+      text-decoration: none;
+
+      &:hover,
+      &.active {
+        color: variables.$primario;
+      }
+    }
+  }
+
+  &__usuario {
+    color: variables.$borde;
+    font-size: 0.9rem;
+  }
+
+  &__logout {
+    background-color: transparent;
+    color: variables.$blanco;
+    border: 1px solid variables.$blanco;
+    border-radius: 6px;
+    padding: 0.4rem 0.9rem;
+    cursor: pointer;
+
+    &:hover {
+      background-color: variables.$blanco;
+      color: variables.$oscuro;
+    }
+  }
+}
+
+.contenido {
+  flex: 1;
+  padding: 2rem;
+}
+
+.footer {
+  background-color: variables.$oscuro;
+  color: variables.$blanco;
+  text-align: center;
+  font-size: 0.85rem;
+  padding: 1rem;
+
+  p {
+    margin: 0;
+  }
+}
