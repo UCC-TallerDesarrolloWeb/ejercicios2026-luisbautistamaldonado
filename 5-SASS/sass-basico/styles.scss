@@ -1,0 +1,46 @@
+// Archivo principal: importa los otros módulos
+@use 'variables';
+@use 'anidados';
+
+// Mixin: recibe el color de fondo y el color de las letras
+@mixin colores($fondo, $texto) {
+  background-color: $fondo;
+  color: $texto;
+}
+
+body {
+  margin: 0;
+  font-family: variables.$fuente;
+  background-color: variables.$color-fondo;
+  color: variables.$color-texto;
+}
+
+.contenido {
+  padding: variables.$espaciado * 2;
+}
+
+// El mismo mixin reutilizado en distintos elementos
+.encabezado {
+  @include colores(variables.$color-primario, variables.$color-claro);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: variables.$espaciado variables.$espaciado * 2;
+
+  h1 {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+}
+
+.alerta {
+  @include colores(variables.$color-alerta, variables.$color-texto);
+  padding: variables.$espaciado;
+  border-radius: variables.$radio;
+}
+
+.pie {
+  @include colores(variables.$color-texto, variables.$color-claro);
+  text-align: center;
+  padding: variables.$espaciado;
+}

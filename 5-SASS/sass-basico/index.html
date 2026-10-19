@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sass básico</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="encabezado">
+    <h1>Sass básico</h1>
+    <nav class="menu">
+        <ul>
+            <li><a href="#">Inicio</a></li>
+            <li><a href="#">Variables</a></li>
+            <li><a href="#">Anidación</a></li>
+            <li><a href="#">Mixins</a></li>
+        </ul>
+    </nav>
+</header>
+
+<main class="contenido">
+    <section class="tarjetas">
+        <article class="tarjeta">
+            <h2>Variables</h2>
+            <p>Guardan colores, fuentes y medidas para reutilizarlos en todo el proyecto.</p>
+            <a href="#" class="boton">Ver más</a>
+        </article>
+        <article class="tarjeta">
+            <h2>Anidación</h2>
+            <p>Permite escribir los estilos de los hijos adentro del selector del padre.</p>
+            <a href="#" class="boton">Ver más</a>
+        </article>
+        <article class="tarjeta">
+            <h2>Mixins</h2>
+            <p>Agrupan reglas que se repiten y se pueden reutilizar con @include.</p>
+            <a href="#" class="boton">Ver más</a>
+        </article>
+    </section>
+
+    <p class="alerta">Este mensaje usa el mismo mixin que el encabezado y el pie, pero con otros colores.</p>
+</main>
+
+<footer class="pie">
+    <p>Taller de Desarrollo Web 2026 - Bautista Maldonado</p>
+</footer>
+
+</body>
+</html>

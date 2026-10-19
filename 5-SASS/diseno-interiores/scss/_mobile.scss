@@ -1,0 +1,39 @@
+@use 'variables';
+
+// Los estilos mobile van dentro de un mixin para poder incluirlos
+// al final de styles.scss (así le ganan a los estilos desktop)
+@mixin estilos {
+  @media (max-width: variables.$mobile) {
+    .header {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+
+      a {
+        margin-left: 0;
+      }
+    }
+
+    .hero {
+      padding: 2rem 1.5rem;
+
+      h1 {
+        font-size: 1.5rem;
+      }
+    }
+
+    .portfolio {
+      grid-template-columns: 1fr;
+
+      img {
+        height: 220px;
+      }
+    }
+  }
+}

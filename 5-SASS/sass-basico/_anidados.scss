@@ -1,0 +1,58 @@
+// Estilos por anidación (descendientes)
+@use 'variables';
+
+.menu {
+  ul {
+    list-style: none;
+    display: flex;
+    gap: variables.$espaciado;
+    margin: 0;
+    padding: 0;
+
+    li {
+      a {
+        color: variables.$color-claro;
+        text-decoration: none;
+
+        &:hover {
+          color: variables.$color-secundario;
+        }
+      }
+    }
+  }
+}
+
+.tarjetas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: variables.$espaciado;
+
+  .tarjeta {
+    flex: 1 1 200px;
+    background-color: variables.$color-claro;
+    border-radius: variables.$radio;
+    padding: variables.$espaciado;
+
+    h2 {
+      color: variables.$color-primario;
+      margin-top: 0;
+    }
+
+    p {
+      line-height: 1.5;
+    }
+
+    .boton {
+      display: inline-block;
+      background-color: variables.$color-secundario;
+      color: variables.$color-claro;
+      padding: 8px 12px;
+      border-radius: variables.$radio;
+      text-decoration: none;
+
+      &:hover {
+        opacity: 0.8;
+      }
+    }
+  }
+}
