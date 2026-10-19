@@ -1,0 +1,104 @@
+@use 'variables';
+@use 'mobile';
+
+// ---------- Estilos desktop ----------
+
+body {
+  margin: 0;
+  font-family: variables.$fuente;
+  color: variables.$negro;
+}
+
+.contenedor {
+  width: 90%;
+  max-width: variables.$ancho-maximo;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 0;
+
+  .logo img {
+    width: 90px;
+    display: block;
+  }
+}
+
+.nav {
+  a {
+    margin-left: 2.5rem;
+    color: variables.$gris;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    text-decoration: none;
+
+    &:hover {
+      color: variables.$naranja;
+    }
+  }
+}
+
+.hero {
+  background-color: variables.$naranja;
+  color: variables.$blanco;
+  padding: 3rem 12%;
+
+  h1 {
+    font-weight: 500;
+    font-size: 2rem;
+    margin-top: 0;
+  }
+
+  p {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    margin-bottom: 2rem;
+  }
+
+  .boton {
+    display: inline-block;
+    background-color: variables.$blanco;
+    color: variables.$negro;
+    padding: 0.8rem 1.5rem;
+    font-size: 0.8rem;
+    text-decoration: none;
+
+    &:hover {
+      background-color: variables.$negro;
+      color: variables.$blanco;
+    }
+  }
+}
+
+.portfolio {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  margin: 2rem auto;
+
+  img {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    display: block;
+  }
+}
+
+.footer {
+  background-color: variables.$negro;
+  color: variables.$blanco;
+  text-align: center;
+  font-size: 0.75rem;
+  padding: 1.2rem 0;
+  margin-bottom: 2rem;
+
+  p {
+    margin: 0;
+  }
+}
+
+// ---------- Estilos mobile ----------
+// Se incluyen al final para que pisen a los de desktop
+@include mobile.estilos;
