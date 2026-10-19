@@ -60,178 +60,237 @@ const mostrarMensaje = (texto) => {
   els.mensaje.textContent = texto;
 };
 
+/* Busca un sabor por id (la uso en varios TODO) */
+const buscarSabor = (id) => estado.sabores.find((sabor) => sabor.id === id);
+
 /* ==========================================================
    TODO 1 — Cargar los datos (fetch + async/await)
-   Leé RUTA_DB con fetch y guardá en `estado`:
-   heladeria, sabores, pedidos y promociones.
-   Si la respuesta no está ok (respuesta.ok), lanzá un Error.
-   Pista: const respuesta = await fetch(RUTA_DB); await respuesta.json()
    ========================================================== */
 const cargarDatos = async () => {
-  // TODO 1
+  const respuesta = await fetch(RUTA_DB);
+
+  if (!respuesta.ok) {
+    throw new Error(`No se pudo leer ${RUTA_DB} (estado ${respuesta.status})`);
+  }
+
+  const { heladeria, sabores, pedidos, promociones } = await respuesta.json();
+
+  estado.heladeria = heladeria;
+  estado.sabores = sabores;
+  estado.pedidos = pedidos;
+  estado.promociones = promociones;
 };
 
 /* ==========================================================
    TODO 2 — Encabezado y categorías
-   a) renderEncabezado: poné el nombre y el eslogan en els.nombre y els.eslogan.
-   b) obtenerCategorias: devolvé un array con las categorías SIN repetir.
-      Pista: .map() para sacar las categorías y new Set(...) con spread [...].
-   c) renderCategorias: por cada categoría creá un <option value="...">...</option>
-      con .map() + .join(""), y agregalas al select (dejá la opción "todas").
    ========================================================== */
 const renderEncabezado = () => {
-  // TODO 2a
+  const { nombre, eslogan } = estado.heladeria;
+  els.nombre.textContent = nombre;
+  els.eslogan.textContent = eslogan;
 };
 
 const obtenerCategorias = () => {
-  // TODO 2b
-  return [];
+  return [...new Set(estado.sabores.map((sabor) => sabor.categoria))];
 };
 
 const renderCategorias = () => {
-  // TODO 2c
+  const opciones = obtenerCategorias()
+    .map((categoria) => `<option value="${categoria}">${categoria}</option>`)
+    .join("");
+
+  // += para no borrar la opción "todas"
+  els.categoria.innerHTML += opciones;
 };
 
 /* ==========================================================
    TODO 3 — Filtrar y ordenar (.filter, .includes, .sort)
-   filtrarSabores debe devolver un array NUEVO con los sabores que cumplan:
-     - el nombre incluye el texto buscado (ignorando mayúsculas)
-     - la categoría coincide (o es "todas")
-     - si "vegano" está tildado, solo veganos
-     - si "sinTacc" está tildado, solo sin TACC
-   Después ordenalos según estado.filtros.orden:
-     "nombre" | "precio-asc" | "precio-desc" | "stock"
-   Pistas:
-     - Desestructurá: const { texto, categoria, vegano, sinTacc, orden } = estado.filtros;
-     - .sort() MUTA el array: ordená una copia ([...array]).
-     - Para nombres usá a.nombre.localeCompare(b.nombre, "es").
-     - Podés guardar los comparadores en un objeto: { nombre: (a, b) => ..., ... }
    ========================================================== */
 const filtrarSabores = () => {
-  // TODO 3
-  return estado.sabores;
+  const { texto, categoria, vegano, sinTacc, orden } = estado.filtros;
+  const busqueda = texto.trim().toLowerCase();
+
+  const comparadores = {
+    nombre: (a, b) => a.nombre.localeCompare(b.nombre, "es"),
+    "precio-asc": (a, b) => a.precio - b.precio,
+    "precio-desc": (a, b) => b.precio - a.precio,
+    stock: (a, b) => b.stock - a.stock,
+  };
+
+  const filtrados = estado.sabores
+    .filter((sabor) => sabor.nombre.toLowerCase().includes(busqueda))
+    .filter((sabor) => categoria === "todas" || sabor.categoria === categoria)
+    .filter((sabor) => !vegano || sabor.vegano)
+    .filter((sabor) => !sinTacc || sabor.sinTacc);
+
+  // ordeno una copia para no mutar el array
+  return [...filtrados].sort(comparadores[orden] ?? comparadores.nombre);
 };
 
 /* ==========================================================
    TODO 4 — Dibujar el catálogo (.map + template literals)
-   a) cantidadEnCarrito(id): cuántas bolas de ese sabor hay en el carrito
-      (0 si no está). Pista: .find() y el operador ?. con ??
-   b) tarjetaSabor(sabor): devuelve el HTML de UNA tarjeta. Usá esta estructura:
-
-      <article class="sabor ${agotado ? "sabor--agotado" : ""}">
-        <div class="sabor__bola" style="--color: ${sabor.color}" aria-hidden="true"></div>
-        <h3>${sabor.nombre}</h3>
-        <p class="sabor__desc">${sabor.descripcion}</p>
-        <ul class="etiquetas"> ...un <li> por etiqueta ("Vegano", "Sin TACC")... </ul>
-        <div class="sabor__pie">
-          <strong>${formatearPrecio(sabor.precio)}</strong>
-          <button class="btn" data-accion="agregar" data-id="${sabor.id}" ${agotado ? "disabled" : ""}>
-            ${agotado ? "Sin stock" : "Agregar"}
-          </button>
-        </div>
-        <small class="sabor__stock">Quedan ${disponible}</small>
-      </article>
-
-      disponible = stock - lo que ya está en el carrito. agotado = disponible <= 0.
-      Pista para las etiquetas: [sabor.vegano && "Vegano", sabor.sinTacc && "Sin TACC"]
-      .filter(Boolean).map(...).join("")
-   c) renderCatalogo: usá filtrarSabores() y .map(tarjetaSabor).join("") para llenar
-      els.lista. Actualizá els.contador ("3 sabores" / "1 sabor"). Si no hay
-      resultados, mostrá <p class="vacio">No hay sabores con esos filtros. Probá sacar alguno.</p>
    ========================================================== */
 const cantidadEnCarrito = (id) => {
-  // TODO 4a
-  return 0;
+  return estado.carrito.find((item) => item.id === id)?.cantidad ?? 0;
 };
 
 const tarjetaSabor = (sabor) => {
-  // TODO 4b
-  return "";
+  const disponible = sabor.stock - cantidadEnCarrito(sabor.id);
+  const agotado = disponible <= 0;
+
+  const etiquetas = [sabor.vegano && "Vegano", sabor.sinTacc && "Sin TACC"]
+    .filter(Boolean)
+    .map((etiqueta) => `<li>${etiqueta}</li>`)
+    .join("");
+
+  return `
+    <article class="sabor ${agotado ? "sabor--agotado" : ""}">
+      <div class="sabor__bola" style="--color: ${sabor.color}" aria-hidden="true"></div>
+      <h3>${sabor.nombre}</h3>
+      <p class="sabor__desc">${sabor.descripcion}</p>
+      <ul class="etiquetas">${etiquetas}</ul>
+      <div class="sabor__pie">
+        <strong>${formatearPrecio(sabor.precio)}</strong>
+        <button class="btn" data-accion="agregar" data-id="${sabor.id}" ${agotado ? "disabled" : ""}>
+          ${agotado ? "Sin stock" : "Agregar"}
+        </button>
+      </div>
+      <small class="sabor__stock">Quedan ${disponible}</small>
+    </article>`;
 };
 
 const renderCatalogo = () => {
-  // TODO 4c
+  const sabores = filtrarSabores();
+  const cantidad = sabores.length;
+
+  els.contador.textContent = `${cantidad} ${cantidad === 1 ? "sabor" : "sabores"}`;
+
+  els.lista.innerHTML =
+    cantidad > 0
+      ? sabores.map(tarjetaSabor).join("")
+      : `<p class="vacio">No hay sabores con esos filtros. Probá sacar alguno.</p>`;
 };
 
 /* ==========================================================
    TODO 5 — Operaciones del carrito (.find, .filter, push)
-   a) agregarAlCarrito(id):
-      - buscá el sabor (.find). Si no existe, salí.
-      - si ya hay tanta cantidad en el carrito como stock, mostrá un mensaje
-        (mostrarMensaje) y salí.
-      - si el sabor ya está en el carrito sumale 1; si no, hacé push({ id, cantidad: 1 }).
-      - al final llamá a actualizarVista().
-   b) cambiarCantidad(id, delta): suma o resta `delta` a la cantidad.
-      - si queda en 0 o menos, quitá el sabor del carrito.
-      - si supera el stock, mostrá un mensaje y no cambies nada.
-   c) quitarDelCarrito(id): reemplazá estado.carrito por uno nuevo SIN ese id (.filter).
-   d) vaciarCarrito(): dejá el carrito en [].
-   Todas terminan con actualizarVista().
    ========================================================== */
 const agregarAlCarrito = (id) => {
-  // TODO 5a
+  const sabor = buscarSabor(id);
+  if (!sabor) return;
+
+  if (cantidadEnCarrito(id) >= sabor.stock) {
+    mostrarMensaje(`No queda más stock de ${sabor.nombre}.`);
+    return;
+  }
+
+  const item = estado.carrito.find((item) => item.id === id);
+
+  if (item) {
+    item.cantidad += 1;
+  } else {
+    estado.carrito.push({ id, cantidad: 1 });
+  }
+
+  mostrarMensaje("");
+  actualizarVista();
 };
 
 const cambiarCantidad = (id, delta) => {
-  // TODO 5b
+  const item = estado.carrito.find((item) => item.id === id);
+  if (!item) return;
+
+  const sabor = buscarSabor(id);
+  const nuevaCantidad = item.cantidad + delta;
+
+  if (nuevaCantidad <= 0) {
+    quitarDelCarrito(id);
+    return;
+  }
+
+  if (nuevaCantidad > sabor.stock) {
+    mostrarMensaje(`Solo hay ${sabor.stock} bolas de ${sabor.nombre}.`);
+    return;
+  }
+
+  item.cantidad = nuevaCantidad;
+  mostrarMensaje("");
+  actualizarVista();
 };
 
 const quitarDelCarrito = (id) => {
-  // TODO 5c
+  estado.carrito = estado.carrito.filter((item) => item.id !== id);
+  actualizarVista();
 };
 
 const vaciarCarrito = () => {
-  // TODO 5d
+  estado.carrito = [];
+  actualizarVista();
 };
 
 /* ==========================================================
    TODO 6 — Totales (.map con spread + .reduce)
-   a) detalleCarrito(): devuelve un array con los datos completos de cada item:
-        { ...sabor, cantidad, subtotal }   (subtotal = precio * cantidad)
-      Pista: .map() sobre estado.carrito y .find() en estado.sabores.
-   b) calcularTotales(): devuelve { subtotal, bolas, promo, descuento, total }
-      - subtotal: suma de los subtotales (.reduce)
-      - bolas: suma de las cantidades (.reduce)
-      - promo: la promoción de MAYOR porcentaje cuyo minimoBolas <= bolas
-               (o null si ninguna aplica). Pista: .filter + .sort + [0]
-      - descuento: subtotal * porcentaje / 100, redondeado (Math.round). 0 si no hay promo.
-      - total: subtotal - descuento
    ========================================================== */
 const detalleCarrito = () => {
-  // TODO 6a
-  return [];
+  return estado.carrito.map(({ id, cantidad }) => {
+    const sabor = buscarSabor(id);
+    return { ...sabor, cantidad, subtotal: sabor.precio * cantidad };
+  });
 };
 
 const calcularTotales = () => {
-  // TODO 6b
-  return { subtotal: 0, bolas: 0, promo: null, descuento: 0, total: 0 };
+  const items = detalleCarrito();
+
+  const subtotal = items.reduce((acumulado, item) => acumulado + item.subtotal, 0);
+  const bolas = items.reduce((acumulado, item) => acumulado + item.cantidad, 0);
+
+  // .filter devuelve un array nuevo, así que el .sort no toca estado.promociones
+  const promo =
+    estado.promociones
+      .filter((promocion) => promocion.minimoBolas <= bolas)
+      .sort((a, b) => b.porcentaje - a.porcentaje)[0] ?? null;
+
+  const descuento = promo ? Math.round((subtotal * promo.porcentaje) / 100) : 0;
+
+  return { subtotal, bolas, promo, descuento, total: subtotal - descuento };
 };
 
 /* ==========================================================
    TODO 7 — Dibujar el carrito
-   renderCarrito debe:
-   - llenar els.carrito con un <li> por item (.map + .join). Estructura:
-
-       <li class="item">
-         <div class="item__info">
-           <strong>${nombre}</strong>
-           <span>${formatearPrecio(precio)} c/u</span>
-         </div>
-         <div class="item__controles">
-           <button type="button" data-accion="restar" data-id="${id}" aria-label="Restar uno">−</button>
-           <span>${cantidad}</span>
-           <button type="button" data-accion="sumar" data-id="${id}" aria-label="Sumar uno">+</button>
-           <button type="button" data-accion="quitar" data-id="${id}" aria-label="Quitar ${nombre}">✕</button>
-         </div>
-         <span class="item__subtotal">${formatearPrecio(subtotal)}</span>
-       </li>
-
-   - si el carrito está vacío: <li class="vacio">Todavía no elegiste sabores.</li>
-   - mostrar subtotal, descuento (con el % si hay promo) y total
-   - deshabilitar els.btnFinalizar y els.btnVaciar si el carrito está vacío
    ========================================================== */
 const renderCarrito = () => {
-  // TODO 7
+  const items = detalleCarrito();
+  const totales = calcularTotales();
+  const vacio = items.length === 0;
+
+  els.carrito.innerHTML = vacio
+    ? `<li class="vacio">Todavía no elegiste sabores.</li>`
+    : items
+        .map(
+          ({ id, nombre, precio, cantidad, subtotal }) => `
+      <li class="item">
+        <div class="item__info">
+          <strong>${nombre}</strong>
+          <span>${formatearPrecio(precio)} c/u</span>
+        </div>
+        <div class="item__controles">
+          <button type="button" data-accion="restar" data-id="${id}" aria-label="Restar uno">−</button>
+          <span>${cantidad}</span>
+          <button type="button" data-accion="sumar" data-id="${id}" aria-label="Sumar uno">+</button>
+          <button type="button" data-accion="quitar" data-id="${id}" aria-label="Quitar ${nombre}">✕</button>
+        </div>
+        <span class="item__subtotal">${formatearPrecio(subtotal)}</span>
+      </li>`
+        )
+        .join("");
+
+  els.subtotal.textContent = formatearPrecio(totales.subtotal);
+  els.descuento.textContent = totales.promo
+    ? `− ${formatearPrecio(totales.descuento)} (${totales.promo.porcentaje}%)`
+    : formatearPrecio(0);
+  els.total.textContent = formatearPrecio(totales.total);
+
+  els.btnFinalizar.disabled = vacio;
+  els.btnVaciar.disabled = vacio;
 };
 
 /* ---------- Refresca todo lo visual que depende del carrito (YA HECHO) ---------- */
@@ -242,45 +301,96 @@ const actualizarVista = () => {
 
 /* ==========================================================
    TODO 8 — Confirmar el pedido
-   finalizarPedido():
-   - si el carrito está vacío, salí
-   - descontá el stock de estado.sabores (.map, devolviendo un sabor nuevo
-     con { ...sabor, stock: sabor.stock - cantidad } cuando corresponda)
-   - agregá el pedido a estado.pedidos con push:
-       { id: <siguiente id>, cliente: "Mostrador", fecha: "AAAA-MM-DD", items: [{ saborId, cantidad }] }
-     Pista fecha: new Date().toISOString().slice(0, 10)
-   - vaciá el carrito
-   - mostrá un mensaje: "Pedido confirmado: 2 × Vainilla, 1 × Limón. Total $ 5.800."
-   - actualizá la vista y las estadísticas
-   Ojo: guardá el resumen y el total ANTES de vaciar el carrito.
    ========================================================== */
 const finalizarPedido = () => {
-  // TODO 8
+  if (estado.carrito.length === 0) return;
+
+  // guardo el resumen y el total ANTES de vaciar el carrito
+  const resumen = detalleCarrito()
+    .map(({ nombre, cantidad }) => `${cantidad} × ${nombre}`)
+    .join(", ");
+  const { total } = calcularTotales();
+
+  estado.sabores = estado.sabores.map((sabor) => {
+    const cantidad = cantidadEnCarrito(sabor.id);
+    return cantidad > 0 ? { ...sabor, stock: sabor.stock - cantidad } : sabor;
+  });
+
+  const siguienteId = estado.pedidos.reduce((maximo, pedido) => Math.max(maximo, pedido.id), 0) + 1;
+
+  estado.pedidos.push({
+    id: siguienteId,
+    cliente: "Mostrador",
+    fecha: new Date().toISOString().slice(0, 10),
+    items: estado.carrito.map(({ id, cantidad }) => ({ saborId: id, cantidad })),
+  });
+
+  estado.carrito = [];
+  mostrarMensaje(`Pedido confirmado: ${resumen}. Total ${formatearPrecio(total)}.`);
+  actualizarVista();
+  renderEstadisticas();
 };
 
 /* ==========================================================
    TODO 9 — Estadísticas (reduce, flatMap, some, every...)
-   Cada función devuelve un valor; renderEstadisticas los muestra.
-   a) precioPromedio(): promedio de precio de todos los sabores (.reduce).
-   b) saborMasCaro(): el objeto sabor con mayor precio (.reduce).
-   c) saboresPorCategoria(): objeto { "Cremas": 5, "Chocolates": 3, ... } (.reduce).
-   d) nombresSinStock(): string con los nombres de los sabores con stock 0,
-      separados por coma (.filter + .map + .join).
-   e) todosLosFrutalesSonVeganos(): true/false (.filter + .every).
-   f) ingresosPedidos(): plata total de todos los pedidos cargados.
-      Pista: estado.pedidos.flatMap((p) => p.items) y luego .reduce, buscando
-      el precio de cada sabor con .find.
-   g) rankingPedidos(): los 3 sabores más pedidos como [{ nombre, cantidad }, ...]
-      de mayor a menor. Pista: flatMap + reduce a un objeto { saborId: cantidad },
-      luego Object.entries, .map, .sort y .slice(0, 3).
    ========================================================== */
-const precioPromedio = () => 0;               // TODO 9a
-const saborMasCaro = () => ({ nombre: "-", precio: 0 }); // TODO 9b
-const saboresPorCategoria = () => ({});       // TODO 9c
-const nombresSinStock = () => "";             // TODO 9d
-const todosLosFrutalesSonVeganos = () => false; // TODO 9e
-const ingresosPedidos = () => 0;              // TODO 9f
-const rankingPedidos = () => [];              // TODO 9g
+// 9a
+const precioPromedio = () => {
+  if (estado.sabores.length === 0) return 0;
+  return estado.sabores.reduce((acumulado, sabor) => acumulado + sabor.precio, 0) / estado.sabores.length;
+};
+
+// 9b
+const saborMasCaro = () =>
+  estado.sabores.reduce((masCaro, sabor) => (sabor.precio > masCaro.precio ? sabor : masCaro), {
+    nombre: "-",
+    precio: 0,
+  });
+
+// 9c
+const saboresPorCategoria = () =>
+  estado.sabores.reduce((conteo, sabor) => {
+    conteo[sabor.categoria] = (conteo[sabor.categoria] ?? 0) + 1;
+    return conteo;
+  }, {});
+
+// 9d
+const nombresSinStock = () =>
+  estado.sabores
+    .filter((sabor) => sabor.stock <= 0)
+    .map((sabor) => sabor.nombre)
+    .join(", ");
+
+// 9e
+const todosLosFrutalesSonVeganos = () =>
+  estado.sabores.filter((sabor) => sabor.categoria === "Frutales").every((sabor) => sabor.vegano);
+
+// 9f
+const ingresosPedidos = () =>
+  estado.pedidos
+    .flatMap((pedido) => pedido.items)
+    .reduce((acumulado, { saborId, cantidad }) => {
+      const precio = buscarSabor(saborId)?.precio ?? 0;
+      return acumulado + precio * cantidad;
+    }, 0);
+
+// 9g
+const rankingPedidos = () => {
+  const cantidades = estado.pedidos
+    .flatMap((pedido) => pedido.items)
+    .reduce((conteo, { saborId, cantidad }) => {
+      conteo[saborId] = (conteo[saborId] ?? 0) + cantidad;
+      return conteo;
+    }, {});
+
+  return Object.entries(cantidades)
+    .map(([saborId, cantidad]) => ({
+      nombre: buscarSabor(Number(saborId))?.nombre ?? "-",
+      cantidad,
+    }))
+    .sort((a, b) => b.cantidad - a.cantidad)
+    .slice(0, 3);
+};
 
 const tarjetaStat = (titulo, valor) => `
   <article class="stat">
@@ -290,15 +400,30 @@ const tarjetaStat = (titulo, valor) => `
 
 /* ==========================================================
    TODO 10 — Dibujar las estadísticas
-   Armá un array de pares [titulo, valor] usando las funciones del TODO 9 y
-   convertilo en HTML con .map(([titulo, valor]) => tarjetaStat(titulo, valor)).join("").
-   Tarjetas sugeridas:
-     "Sabores en carta", "Precio promedio por bola", "Sabor más caro",
-     "Sabores por categoría", "Los más pedidos", "Sin stock",
-     "Ingresos de los pedidos cargados", "¿Todos los frutales son veganos?"
    ========================================================== */
 const renderEstadisticas = () => {
-  // TODO 10
+  const masCaro = saborMasCaro();
+
+  const porCategoria = Object.entries(saboresPorCategoria())
+    .map(([categoria, cantidad]) => `${categoria}: ${cantidad}`)
+    .join("<br>");
+
+  const masPedidos = rankingPedidos()
+    .map(({ nombre, cantidad }, indice) => `${indice + 1}. ${nombre} (${cantidad})`)
+    .join("<br>");
+
+  const stats = [
+    ["Sabores en carta", estado.sabores.length],
+    ["Precio promedio por bola", formatearPrecio(precioPromedio())],
+    ["Sabor más caro", `${masCaro.nombre} (${formatearPrecio(masCaro.precio)})`],
+    ["Sabores por categoría", porCategoria],
+    ["Los más pedidos", masPedidos || "Todavía no hay pedidos"],
+    ["Sin stock", nombresSinStock() || "Ninguno"],
+    ["Ingresos de los pedidos cargados", formatearPrecio(ingresosPedidos())],
+    ["¿Todos los frutales son veganos?", todosLosFrutalesSonVeganos() ? "Sí" : "No"],
+  ];
+
+  els.estadisticas.innerHTML = stats.map(([titulo, valor]) => tarjetaStat(titulo, valor)).join("");
 };
 
 /* ---------- Eventos (YA HECHO) ----------
