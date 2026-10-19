@@ -1,0 +1,11 @@
+.home {
+  h2 {
+    margin-top: 0;
+  }
+
+  &__cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+  }
+}
