@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <title>Navegador</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <link rel="stylesheet" href="./dist/reset.css" />
+    <link rel="stylesheet" href="./dist/reveal.css" />
+    <link rel="stylesheet" href="./dist/theme/league.css" id="theme" />
+    <link rel="stylesheet" href="./css/highlight/base16/zenburn.css" />
+
+    <link rel="stylesheet" href="./_assets/slides/css/filminas.css" />
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section data-markdown data-separator="^---" data-separator-vertical="^\r?\n----\r?\n$">
+          <textarea data-template>
+            
+
+# Funcionamiento del Navegador
+Created by <i class="fab fa-telegram"></i>
+edme88
+
+---
+<!-- .slide: style="font-size: 0.60em" -->
+<style>
+.grid-container2 {
+    display: grid;
+    grid-template-columns: auto auto;
+    font-size: 0.8em;
+    text-align: left !important;
+}
+
+.grid-item {
+    border: 3px solid rgba(121, 177, 217, 0.8);
+    padding: 20px;
+    text-align: left !important;
+}
+</style>
+## Temario
+<div class="grid-container2">
+<div class="grid-item">
+
+- Ciclo de vida de una página web
+- Eventos del Ciclo de Vida
+- Optimización
+- DevTools
+
+</div>
+<div class="grid-item">
+
+
+</div>
+</div>
+
+---
+
+## Ciclo de Vida de una Página Web
+
+1. Ingreso de la URL y resolución DNS
+2. Conexión TCP/TLS
+3. Solicitud HTTP/HTTPS
+4. Respuesta del servidor
+5. Parseo y construcción del DOM y CSSOM
+6. Generación del Render Tree
+7. Layout (Reflow)
+8. Pintado (Painting)
+9. Composición (Compositing)
+10. Interacción y ciclo dinámico
+
+----
+
+![Ciclo de Vida](images/navegador/ciclo-de-vida.jpg)
+
+<small>TTFB significa Time to First Byte</small>
+
+----
+
+### 1. Ingreso de la URL y resolución DNS
+
+El ciclo comienza cuando el usuario escribe una URL en el navegador o hace clic en un enlace.
+- El navegador consulta al DNS (Domain Name System) para traducir el nombre de dominio (ej: www.ejemplo.com) en una dirección IP.
+- Con la dirección IP, puede ubicar el servidor que aloja el sitio.
+
+----
+
+### 2. Conexión TCP/TLS
+- El navegador abre una conexión TCP(Transmission Control Protocol) con el servidor.
+- Si la conexión es HTTPS, ocurre el handshake TLS (Transport Layer Security ):
+    - Intercambio de certificados.
+    - Negociación de claves de cifrado.
+    - Establecimiento de un canal seguro.
+
+----
+
+### 3. Solicitud HTTP/HTTPS
+
+Una vez establecida la conexión, el navegador envía una solicitud HTTP (Hypertext Transfer Protocol) o HTTPS al servidor correspondiente. Esta solicitud puede incluir cabeceras, cookies o tokens que identifican al cliente.
+
+----
+
+### 4. Respuesta del servidor
+
+El servidor procesa la petición y responde con un código de estado HTTP y los recursos solicitados, que incluyen:
+- El documento HTML principal.
+- Archivos adicionales: CSS, JavaScript, imágenes, fuentes, videos, etc.
+
+----
+
+### 5. Parseo y construcción del DOM y CSSOM
+
+Una vez recibido el HTML, el navegador lo interpreta paso a paso:
+- Construye el DOM (Document Object Model), que es una representación en memoria de la estructura del documento HTML.
+- Descarga y procesa los archivos CSS para crear el CSSOM (CSS Object Model).
+- Si encuentra un `<script>` bloqueante, puede pausar el parseo hasta que lo ejecute.
+
+----
+
+### 6. Generación del Render Tree
+
+El DOM y el CSSOM se combinan para formar el árbol de renderizado (Render Tree), que contiene la información de qué elementos deben mostrarse y cómo deben hacerlo.
+
+----
+
+### 7. Layout (Reflow)
+
+El navegador calcula la posición y tamaño exactos de cada elemento en la página (layout). Aquí se determinan dimensiones, márgenes, alineaciones y relaciones entre los elementos.
+
+----
+
+### 8. Pintado (Painting)
+
+Con el layout definido, el navegador pinta los píxeles en la pantalla, aplicando colores, bordes, imágenes y tipografías.
+
+----
+
+### 9. Composición (Compositing)
+
+En esta etapa final, el navegador organiza las capas de la página (ej. un menú fijo sobre el contenido, una animación, etc.) y las combina en la pantalla del usuario.
+
+----
+
+### 10. Interacción y ciclo dinámico
+
+Una vez renderizada la página, comienza la interacción con el usuario:
+- El JavaScript puede modificar el DOM, hacer nuevas solicitudes (AJAX, fetch) o generar cambios dinámicos.
+- Esto puede disparar nuevamente procesos de layout, paint o incluso compositing parcial.
+
+---
+
+### Ejercicio: Análisis de DNS, TCP/TLS, Solicitud/Respuesa
+
+1. Abrí las DevTools → Network en Chrome/Firefox.
+2. Ingresá a una página (ej: https://www.wikipedia.org/).
+3. Observá:
+   - DNS Lookup: cuánto tarda en resolver el dominio.
+   - Initial connection (TCP/TLS): tiempo del handshake.
+   - Request/Response: ver las cabeceras HTTP.
+4. Compará tiempos con otra web (ej: https://github.com/).
+
+----
+
+![Timing](images/navegador/navegador-tiempos.png)
+
+---
+
+### Eventos clave del ciclo de vida
+
+- **DOMContentLoaded:** el DOM está construido (sin esperar imágenes o estilos).
+- **load:** se cargaron todos los recursos.
+- **beforeunload / unload:** cuando se abandona la página.
+
+---
+
+### Optimización (performance)
+
+- El **Reflow** es costoso. Cambios en dimensiones disparan recalculados completos.
+- El **Repaint** es menos costoso, solo cambia lo visual (ej. color).
+- El **Compositing** puede mover capas sin recalcular layout ni repintar.
+
+Usar técnicas como:
+- will-change, transform y opacity para animaciones.
+- Scripts con defer/async para no bloquear el parseo.
+- Minimizar CSS y JS innecesario.
+
+---
+
+### DevTools
+
+Son un conjunto de herramientas para desarrolladores web que están integradas directamente en el navegador. Esto permite editar páginas renderizadas y diagnosticar problemas con rapidez, lo que te ayuda a crear mejores sitios web en menos tiempo.
+
+---
+
+### Dev Tools
+<!-- .slide: style="font-size: 0.80em" -->
+- **Elements:** inspección y edición de HTML/CSS.
+- **Console:** ejecución de JavaScript, visualización de logs y errores 
+- **Sources:** depuración de JavaScript, puntos de interrupción (breakpoints), navegación entre archivos de código 
+- **Network:** monitoreo de las solicitudes de red, tiempos de carga, recursos, etc. 
+- **Performance:** análisis detallado del rendimiento (carga, interacciones, CPU, memoria, frames) 
+- **Application:** gestión del almacenamiento local, IndexedDB, service workers, cachés 
+- **Security:** verificación de seguridad, certificados, contenido mixto 
+- **Otros paneles:** Lighthouse, Memory, Accessibility, CSS Overview y más
+
+----
+
+![DevTools](images/navegador/devTools.png)
+
+---
+
+## [Chrome Dev Tools](https://developer.chrome.com/docs/devtools?hl=es-419)
+
+Es un conjunto de herramientas incorporadas en el navegador que permiten editar páginas en tiempo real, diagnosticar problemas y optimizar el desarrollo web.
+
+---
+
+## Temas complementarios en el ciclo de vida
+<!-- .slide: style="font-size: 0.80em" -->
+Además de las etapas principales del renderizado, existen factores clave que afectan:
+- **Performance** (caché, CDN, ruta crítica).
+- **Interacción y eventos** (eventos globales, animaciones).
+- **Accesibilidad (A11y)** para todos los usuarios.
+- **Seguridad** frente a ataques y vulnerabilidades.
+
+Estos temas completan la visión del ciclo de vida de una página web en un entorno real.
+
+---
+
+### [Caché del navegador y CDN](https://www.siteground.es/kb/que-es-la-cache)
+
+El navegador no descarga los recursos cada vez que visitas un sitio, sino que los almacena en caché (archivos temporales en disco o memoria).
+- Objetivo: reducir tiempos de carga y tráfico de red.
+- Mecanismos de control:
+  - **Cache-Control:** define cuánto tiempo un recurso puede permanecer en caché.
+  - **ETag:** identificador único que permite validar si un recurso cambió.
+  - **Last-Modified:** fecha de la última modificación del recurso.
+
+----
+
+### CDN
+
+Los CDN (Content Delivery Network) son redes distribuidas de servidores que almacenan copias de recursos estáticos en distintas regiones del mundo. El navegador descarga los archivos desde el nodo más cercano, reduciendo latencia y mejorando la disponibilidad.
+
+----
+
+![CDN](images/navegador/cdn.jpg)
+
+---
+
+### Proceso de carga de una página
+<!-- .slide: style="font-size: 0.90em" -->
+1. Un visitante ingresa la URL de un sitio web en su navegador. El navegador revisa su caché (almacenamiento localmente). Si existe, carga inmediatamente. Si no, el navegador envía una solicitud al servidor del sitio web.
+2. Los archivos del sitio web (HTML, CSS, Js) pueden provenir de una red de entrega de contenido (CDN).
+3. El servidor ensambla el contenido y lo envía al navegador.
+4. Si la página no está en caché, el servidor web procesa la solicitud. Reúne todos los recursos necesarios y puede interactuar con una base de datos para obtener contenido dinámico.
+
+----
+
+![Carga de Pagina](images/navegador/proceso-de-carga-de-pagina.jpeg)
+
+---
+
+### Critical Rendering Path
+<!-- .slide: style="font-size: 0.80em" -->
+Es la **ruta crítica de renderizado** que el navegador sigue desde recibir el HTML hasta mostrar el primer píxel en pantalla.
+
+- Se consideran críticos los recursos que bloquean la renderización inicial, como CSS o scripts bloqueantes.
+- Optimizar el CRP implica:
+  - Inyectar CSS crítico en línea (para el contenido visible sin scroll).
+  - Cargar scripts con defer o async.
+  - Usar lazy loading para imágenes y videos fuera de pantalla.
+
+Mientras más corto sea este camino, más rápida será la percepción de carga para el usuario.
+
+----
+
+![CRP](images/navegador/CRP.jpg)
+
+----
+
+### CRP: 1. Inyectar CSS crítico
+
+- **El problema:** Por defecto, las hojas de estilo externas (`<link rel="stylesheet">`) son bloqueantes de renderizado. El navegador no mostrará nada hasta que haya descargado y procesado todo el CSS.
+
+- **La solución:** El "CSS crítico" consiste en identificar los estilos necesarios para diseñar la parte superior de la página (lo que se ve sin hacer scroll). Esos estilos se escriben dentro de una etiqueta `<style>` en el propio HTML.
+
+----
+
+### CRP: Cargar scripts con defer o async
+<!-- .slide: style="font-size: 0.90em" -->
+- **El problema:** Cuando el navegador está leyendo el HTML y encuentra una etiqueta `<script>`, detiene completo la construcción del DOM para descargar y ejecutar el JavaScript, bloqueando la carga.
+
+- **Solución:**
+  - **async (asíncrono):** Le indica al navegador que descargue el script en segundo plano mientras sigue leyendo el HTML.
+  - **defer (diferido):** Descarga el script en segundo plano, pero espera a que el HTML termine de parsearse por completo antes de ejecutarlo.
+
+----
+
+### CRP:  Usar lazy loading
+- **El problema:** Por defecto, al entrar a una web, el navegador intenta descargar todos los recursos de la página a la vez. Esto ralentiza la carga principal.
+- **La solución:** El lazy loading le indica al navegador —mediante el atributo loading="lazy" en las etiquetas `<img>` o `<video>`— que no descargue esos recursos multimedia hasta que el usuario esté a punto de hacer scroll y lleguen a visualizarse en la pantalla.
+
+---
+
+### Eventos del navegador
+<!-- .slide: style="font-size: 0.90em" -->
+Los navegadores exponen múltiples **eventos globales** que permiten reaccionar a cambios en la ventana o documento:
+- **visibilitychange:** detecta si la pestaña se oculta o vuelve a primer plano.
+- **resize:** se dispara cuando la ventana cambia de tamaño.
+- **scroll:** ocurre al desplazarse dentro de la página.
+- **beforeunload:** permite advertir al usuario antes de abandonar la página.
+
+Además, existe la API **requestAnimationFrame**, pensada para animaciones fluidas porque sincroniza las actualizaciones con la tasa de refresco de la pantalla.
+
+----
+
+### Eventos del navegador
+Conocer los eventos globales del navegador (como DOMContentLoaded, load, beforeunload, resize, o scroll) sirve para controlar el tiempo y las condiciones en las que se ejecuta el código JavaScript, mejorando tanto el rendimiento como la experiencia del usuario.
+
+---
+
+### Accesibilidad (A11y)
+<!-- .slide: style="font-size: 0.70em" -->
+La accesibilidad busca que cualquier persona, incluidas aquellas con discapacidades, pueda usar un sitio web.
+
+- Ejemplo: un lector de pantalla convierte el DOM en voz.
+
+Buenas prácticas:
+- Incluir atributos alt en imágenes.
+- Usar etiquetas semánticas (`<header>, <nav>, <main>`).
+- Roles y atributos aria-* para describir la función de los elementos.
+- Contraste suficiente en colores y tamaños de fuente legibles.
+
+Los navegadores interpretan estas señales para brindar accesibilidad mediante tecnologías asistivas.
+
+---
+
+### Ejercicios: Axe
+1. Instala el plugin de [Axe](https://chromewebstore.google.com/detail/axe-devtools-web-accessib/lhdoppojpmngadmnindnejefpokejbdd?hl=es-419) en Chrome.
+2. Ejecuta las validaciones de accesibilidad en alguna página (Ejemplo: https://tienda.claro.com.ar/)
+
+---
+
+### Ejercicios: Lighthouse
+1. Instala el plugin de [Lighthouse](https://chromewebstore.google.com/detail/lighthouse/blipmdconlkpinefehnmjammfjpmpbjk?hl=es) en Chrome.
+2. Ejecuta las validaciones en **Desktop** de performance, accesibilidad, best practices y SEO en alguna página (Ejemplo: https://tienda.claro.com.ar/)
+3. Ejecuta las validaciones en **Mobile** de performance, accesibilidad, best practices y SEO en alguna página (Ejemplo: https://tienda.claro.com.ar/)
+
+---
+
+### Seguridad en el ciclo de vida de la página
+<!-- .slide: style="font-size: 0.80em" -->
+Durante la carga y ejecución de un sitio, intervienen varios mecanismos de seguridad:
+- **Same-Origin Policy (SOP):** impide que scripts de un origen accedan a recursos de otro origen sin permiso.
+- **CORS (Cross-Origin Resource Sharing):** mecanismo que permite compartir recursos entre orígenes de forma controlada.
+- **Content Security Policy (CSP):** cabecera que limita qué scripts, estilos o recursos pueden cargarse, reduciendo riesgos de XSS (Cross-Site Scripting).
+- **Mixed content:** cuando una página HTTPS carga recursos HTTP inseguros. Esto degrada la seguridad y los navegadores lo bloquean o advierten.
+
+
+----
+
+![CORS](images/navegador/CORS1.png)
+
+----
+
+![CORS](images/navegador/CORS2.png)
+
+----
+
+![CORS](images/navegador/CORS3.png)
+
+---
+## ¿Dudas, Preguntas, Comentarios?
+![DUDAS](images/pregunta.gif)
+
+          </textarea>
+        </section>
+      </div>
+    </div>
+
+    <script src="./dist/reveal.js"></script>
+
+    <script src="./mermaid/dist/mermaid.min.js"></script>
+
+    <script src="./plugin/markdown/markdown.js"></script>
+    <script src="./plugin/highlight/highlight.js"></script>
+    <script src="./plugin/zoom/zoom.js"></script>
+    <script src="./plugin/notes/notes.js"></script>
+    <script src="./plugin/math/math.js"></script>
+    <script>
+      function extend() {
+        var target = {};
+        for (var i = 0; i < arguments.length; i++) {
+          var source = arguments[i];
+          for (var key in source) {
+            if (source.hasOwnProperty(key)) {
+              target[key] = source[key];
+            }
+          }
+        }
+        return target;
+      }
+
+      // default options to init reveal.js
+      var defaultOptions = {
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        transition: 'default', // none/fade/slide/convex/concave/zoom
+        slideNumber: true,
+        highlight: {
+          highlightOnLoad: false
+        },
+        plugins: [
+          RevealMarkdown,
+          RevealHighlight,
+          RevealZoom,
+          RevealNotes,
+          RevealMath
+        ]
+      };
+
+      // options from URL query string
+      var queryOptions = Reveal().getQueryHash() || {};
+
+      var options = extend(defaultOptions, {"controls":true,"progress":true,"slideNumber":true,"_":["slides"],"static":"public"}, queryOptions);
+    </script>
+
+    <script src="./_assets/slides/js/pruebas.js"></script>
+    <script src="./_assets/slides/js/init.js"></script>
+
+    <script>
+      Reveal.initialize(options);
+      Reveal.addEventListener('ready', function (event) {
+        const blocks = Reveal.getRevealElement().querySelectorAll('pre code:not(.mermaid)');
+        const hlp = Reveal.getPlugin('highlight');
+        blocks.forEach(hlp.highlightBlock);
+      });
+    </script>
+
+    <script>
+      const mermaidOptions = extend({ startOnLoad: false }, {});
+      mermaid.startOnLoad = false;
+      mermaid.initialize(mermaidOptions);
+      const cb = function (event) {
+        mermaid.init(mermaidOptions, '.stack.present > .present pre code.mermaid');
+        mermaid.init(mermaidOptions, '.slides > .present:not(.stack) pre code.mermaid');
+      }
+      Reveal.addEventListener('ready', cb);
+      Reveal.addEventListener('slidetransitionend', cb);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selección de Vuelos - Bootstrap</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+    <style>
+        /* Ancho del menú desplegable */
+        .calendar-container {
+            width: min(720px, calc(100vw - 2rem));
+        }
+
+        /* 7 columnas: una por día de la semana */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem 0.25rem;
+            justify-items: center;
+        }
+
+        /* Botones de los días */
+        .calendar-container .dia {
+            width: 2.6rem;
+            height: 2.6rem;
+            padding: 0;
+            border-color: #f1f3f5;
+        }
+
+        .calendar-container .dia:hover,
+        .calendar-container .dia.seleccionado {
+            background-color: var(--bs-primary);
+            border-color: var(--bs-primary);
+            color: #fff !important;
+        }
+
+        /* Botones de las flechas */
+        .calendar-container .flecha {
+            width: 3rem;
+            height: 2.5rem;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body class="p-3">
+
+<div class="dropdown">
+    <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+        Selecciona la fecha
+    </button>
+
+    <div class="dropdown-menu p-4 calendar-container">
+        <h3 class="text-center mb-4">Fechas de Vuelos</h3>
+
+        <div class="row">
+            <!-- Mes izquierdo -->
+            <div class="col-12 col-md-6 border-end">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <button type="button" class="btn btn-outline-secondary flecha" aria-label="Mes anterior">
+                        <span class="material-symbols-outlined">chevron_left</span>
+                    </button>
+                    <span class="fw-bold">Septiembre 2025</span>
+                </div>
+                <div class="calendar-grid" id="mes-septiembre"></div>
+            </div>
+
+            <!-- Mes derecho -->
+            <div class="col-12 col-md-6">
+                <div class="d-flex justify-content-end align-items-center gap-2 mb-3">
+                    <span class="fw-bold">Octubre 2025</span>
+                    <button type="button" class="btn btn-outline-secondary flecha" aria-label="Mes siguiente">
+                        <span class="material-symbols-outlined">chevron_right</span>
+                    </button>
+                </div>
+                <div class="calendar-grid" id="mes-octubre"></div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between mt-4">
+            <button type="button" class="btn btn-outline-secondary">Cancelar</button>
+            <button type="button" class="btn btn-outline-primary">Guardar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const DIAS_SEMANA = ["Lun", "Mar", "Mie", "Jue", "Vie", "Sab", "Dom"];
+
+    /**
+     * Arma la grilla de un mes: los nombres de los días, los días del mes
+     * y los primeros días del mes siguiente (más claritos).
+     * @param {string} idContenedor id del div con clase calendar-grid
+     * @param {number} cantidadDias cantidad de días a mostrar del mes
+     * @param {number} diasSiguiente cantidad de días del mes siguiente para completar la grilla
+     */
+    const generarMes = (idContenedor, cantidadDias, diasSiguiente) => {
+        const encabezado = DIAS_SEMANA
+            .map((dia) => `<span class="fw-bold">${dia}</span>`)
+            .join("");
+
+        const dias = Array.from({ length: cantidadDias }, (_, i) =>
+            `<button type="button" class="btn rounded-circle text-secondary border dia">${i + 1}</button>`
+        ).join("");
+
+        const siguientes = Array.from({ length: diasSiguiente }, (_, i) =>
+            `<button type="button" class="btn rounded-circle text-secondary border dia opacity-50" disabled>${i + 1}</button>`
+        ).join("");
+
+        document.getElementById(idContenedor).innerHTML = encabezado + dias + siguientes;
+    };
+
+    generarMes("mes-septiembre", 30, 5);
+    generarMes("mes-octubre", 30, 5);
+
+    // Al tocar un día queda marcado
+    document.querySelectorAll(".dia").forEach((boton) => {
+        boton.addEventListener("click", () => boton.classList.toggle("seleccionado"));
+    });
+</script>
+
+</body>
+</html>
